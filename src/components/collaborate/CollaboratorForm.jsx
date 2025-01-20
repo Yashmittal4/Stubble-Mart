@@ -60,7 +60,6 @@ export default function CollaboratorForm() {
 
     const onSubmit = (data) => {
         console.log(data);
-        // Here you would typically send the data to your backend
         alert("Form submitted successfully!");
     };
 
