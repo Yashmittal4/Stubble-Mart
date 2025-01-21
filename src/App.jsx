@@ -55,6 +55,12 @@ import LoginPage from "./components/auth/LoginPage"
 import "./App.css"
 import ProductDetails from "./components/products/ProductDetails"
 import Products from "./components/products/Products"
+import Layouta from "./components/admin/layouta"
+import Dashboard from "./components/admin/Dashboard"
+import FarmersPage from "./components/admin/FarmersPage"
+import ProductsPage from "./components/admin/ProductsPage"
+import RecycleBin from "./components/admin/RecycleBin"
+import CollaboratorType from "./components/admin/CollaboratorType"
 
 function App() {
   return (
@@ -69,6 +75,13 @@ function App() {
           <Route path="signup" element={<SignupPage />} />
           <Route path="products" element={<Products />} />
           <Route path="products/:productId" element={<ProductDetails />} />
+        </Route>
+        <Route path="/admin" element={<Layouta />}>
+          <Route index element={<Dashboard />} />
+          <Route path="farmers" element={<FarmersPage />} />
+          <Route path="products" element={<ProductsPage />} />
+          <Route path="recycle-bin" element={<RecycleBin />} />
+          <Route path="collaborator/:type" element={<CollaboratorType />} />
         </Route>
       </Routes>
     </Router>
