@@ -68,18 +68,8 @@ import LoginPage from "./components/auth/LoginPage"
 import "./App.css"
 import ProductDetails from "./components/products/ProductDetails"
 import Products from "./components/products/Products"
-import Layouta from "./components/admin/layouta"
-// import Dashboard from "./components/admin/Dashboard"
-// import FarmersPage from "./components/admin/FarmersPage"
-// import ProductsPage from "./components/admin/ProductsPage"
-import RecycleBin from "./components/admin/RecycleBin"
-// import CollaboratorType from "./components/admin/CollaboratorType"
-// import CollaboratorList from "./components/admin/CollaboratorList"
-// import CollaboratorDetails from "./components/admin/CollaboratorDetails"
-import AdminDashboard from "./components/admin/AdminDashboard"
-import Collaborators from "./components/admin/Collaborators"
-import Farmers from "./components/admin/Farmers"
-import Productsa from "./components/admin/Products"
+
+
 
 function App() {
   return (
@@ -95,13 +85,7 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="products/:productId" element={<ProductDetails />} />
         </Route>
-        <Route path="/admin" element={<Layouta />}>
-        <Route index element={<AdminDashboard />} />
-          <Route path="collaborators" element={<Collaborators />} />
-          <Route path="farmers" element={<Farmers />} />
-          <Route path="products" element={<Productsa />} />
-          <Route path="recycle-bin" element={<RecycleBin />} />
-        </Route>
+        
       </Routes>
     </Router>
   )
