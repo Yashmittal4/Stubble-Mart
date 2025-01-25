@@ -1,6 +1,3 @@
-
-
-
 const express = require("express")
 const mongoose = require("mongoose")
 const bcrypt = require("bcryptjs")
@@ -207,5 +204,35 @@ app.post(
   },
 )
 
+const CollaboratorSchema = new mongoose.Schema({
+  collaborationType: { type: String, required: true },
+  companyName: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  companyAddress: { type: String, required: true },
+  companyDescription: { type: String },
+  query: { type: String },
+  crops: [{
+    cropName: String,
+    priceRangeFrom: Number,
+    priceRangeTo: Number
+  }]
+})
+
+const Collaborator = mongoose.model("Collaborator", CollaboratorSchema)
+
+app.post("/api/submit-collaborator", async (req, res) => {
+  try {
+    const collaborator = new Collaborator(req.body)
+    await collaborator.save()
+    res.status(201).json({ message: "Collaborator information submitted successfully" })
+  } catch (error) {
+    console.error("Error submitting collaborator information:", error)
+    res.status(500).json({ message: "Error submitting collaborator information" })
+  }
+})
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+
 
