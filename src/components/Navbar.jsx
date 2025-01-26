@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from "react"
 import { Menu, Search, Mic, LogOut } from 'lucide-react'
 import { motion, useScroll, useSpring } from "framer-motion"

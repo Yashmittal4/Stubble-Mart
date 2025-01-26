@@ -95,7 +95,7 @@ export default function CollaboratorForm() {
         setIsSubmitting(true)
         setSubmitError(null)
         try {
-          await axios.post("http://localhost:5000/api/submit-collaborator", formData)
+          await axios.post("http://localhost:5000/api/collaborators", formData)
           console.log("Form submitted successfully")
           setStep(3)
         } catch (error) {

@@ -37,7 +37,7 @@ export default function SignupPage() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post("http://localhost:5000/api/signup", data)
+      const response = await axios.post("http://localhost:5000/api/auth/signup", data)
       console.log("Registration initiated:", response.data)
       setEmail(data.email)
       setShowOtpInput(true)
@@ -55,7 +55,7 @@ export default function SignupPage() {
 
   const verifyOtp = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/verify-otp", { email, otp })
+      const response = await axios.post("http://localhost:5000/api/auth/verify-otp", { email, otp })
       console.log("OTP verification successful:", response.data)
       localStorage.setItem("token", response.data.token)
       localStorage.setItem("user", JSON.stringify(response.data.user))

@@ -32,7 +32,7 @@ const LoginPage = () => {
         return
       }
 
-      const response = await axios.post("http://localhost:5000/api/login", credentials)
+      const response = await axios.post("http://localhost:5000/api/auth/login", credentials)
       console.log("Login successful!", response.data)
       login(response.data.user)
       const from = location.state?.from?.pathname || "/"
@@ -50,7 +50,7 @@ const LoginPage = () => {
 
   const verifyOtp = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/verify-otp", { email: credentials.email, otp })
+      const response = await axios.post("http://localhost:5000/api/auth/verify-otp", { email: credentials.email, otp })
       console.log("OTP verification successful:", response.data)
       login(response.data.user)
       const from = location.state?.from?.pathname || "/"
