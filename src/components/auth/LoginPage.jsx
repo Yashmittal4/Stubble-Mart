@@ -48,7 +48,7 @@ const LoginPage = () => {
       console.log("OTP verification successful:", response.data)
       localStorage.setItem("token", response.data.token)
       localStorage.setItem("user", JSON.stringify(response.data.user))
-      navigate("/main")
+      navigate("/")
     } catch (error) {
       console.error("OTP verification error:", error.response.data)
       setError(error.response.data.message || "Invalid OTP")

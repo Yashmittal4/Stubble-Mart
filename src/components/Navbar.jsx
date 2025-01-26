@@ -1,18 +1,36 @@
+
+
 import React, { useState, useEffect } from "react"
-import { Menu, Search, Mic } from "lucide-react"
-import logo from "../assets/svg/logo.svg"
+import { Menu, Search, Mic, LogOut } from 'lucide-react'
 import { motion, useScroll, useSpring } from "framer-motion"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
+import logo from "../assets/svg/logo.svg"
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [user, setUser] = useState(null)
   const { scrollYProgress } = useScroll()
+  const location = useLocation()
 
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   })
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user")
+    if (storedUser) {
+      setUser(JSON.parse(storedUser))
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    setUser(null)
+    window.location.href = "/login"
+  }
 
   return (
     <>
@@ -23,30 +41,39 @@ function Navbar() {
           <div className="flex justify-between items-center">
             <img src={logo || "/placeholder.svg"} alt="Logo" className="h-10" />
 
-            
             <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 flex-1 max-w-md mx-6">
               <Search className="h-5 w-5 text-gray-400 mr-2" />
               <input type="text" placeholder="Search..." className="bg-transparent outline-none w-full text-gray-700" />
               <Mic className="h-5 w-5 text-gray-400 ml-2 cursor-pointer" />
             </div>
 
-            
             <div className="hidden md:flex items-center space-x-6">
-              <NavLink to="/">Home</NavLink>
-              <NavLink to="/about">About</NavLink>
-              <NavLink to="/services">Services</NavLink>
-              <NavLink to="/collab">Collab</NavLink>
-              <NavLink to="/products">Sell</NavLink>
+              <NavLink to="/" currentPath={location.pathname}>Home</NavLink>
+              <NavLink to="/about" currentPath={location.pathname}>About</NavLink>
+              <NavLink to="/services" currentPath={location.pathname}>Services</NavLink>
+              <NavLink to="/collab" currentPath={location.pathname}>Collab</NavLink>
+              <NavLink to="/products" currentPath={location.pathname}>Sell</NavLink>
 
-<Link to="/login">
-              <NavButton>Login</NavButton>
-              </Link>
-              <Link to="/signup">
-              <NavButton primary>Sign Up</NavButton>
-              </Link>
+              {user ? (
+                <>
+                  <span className="text-gray-700">Hi {user.name}</span>
+                  <NavButton onClick={handleLogout}>
+                    <LogOut className="w-5 h-5 mr-2" />
+                    Logout
+                  </NavButton>
+                </>
+              ) : (
+                <>
+                  <Link to="/login">
+                    <NavButton>Login</NavButton>
+                  </Link>
+                  <Link to="/signup">
+                    <NavButton primary>Sign Up</NavButton>
+                  </Link>
+                </>
+              )}
             </div>
 
-            
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden text-gray-700 hover:text-green-500 transition-colors"
@@ -55,7 +82,6 @@ function Navbar() {
             </button>
           </div>
 
-          
           {isMenuOpen && (
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -73,29 +99,29 @@ function Navbar() {
                 <Mic className="h-5 w-5 text-gray-400 ml-2" />
               </div>
               <div className="flex flex-col space-y-2">
-                <NavLink to="/" mobile>
-                  Home
-                </NavLink>
-                <NavLink to="/about" mobile>
-                  About
-                </NavLink>
-                <NavLink to="/services" mobile>
-                  Services
-                </NavLink>
-                <NavLink to="/collab" mobile>
-                  Collab
-                </NavLink>
-                <NavLink to="/products" mobile>
-                  Sell
-                </NavLink>
-                <Link to="/login">
-                <NavButton mobile>Login</NavButton>
-                </Link>
-                <Link to="/signup">
-                <NavButton mobile primary>
-                  Sign Up
-                </NavButton>
-                </Link>
+                <NavLink to="/" currentPath={location.pathname} mobile>Home</NavLink>
+                <NavLink to="/about" currentPath={location.pathname} mobile>About</NavLink>
+                <NavLink to="/services" currentPath={location.pathname} mobile>Services</NavLink>
+                <NavLink to="/collab" currentPath={location.pathname} mobile>Collab</NavLink>
+                <NavLink to="/products" currentPath={location.pathname} mobile>Sell</NavLink>
+                {user ? (
+                  <>
+                    <span className="text-gray-700">Hi {user.name}</span>
+                    <NavButton mobile onClick={handleLogout}>
+                      <LogOut className="w-5 h-5 mr-2" />
+                      Logout
+                    </NavButton>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login">
+                      <NavButton mobile>Login</NavButton>
+                    </Link>
+                    <Link to="/signup">
+                      <NavButton mobile primary>Sign Up</NavButton>
+                    </Link>
+                  </>
+                )}
               </div>
             </motion.div>
           )}
@@ -105,17 +131,21 @@ function Navbar() {
   )
 }
 
-const NavLink = ({ to, children, mobile }) => (
+const NavLink = ({ to, children, currentPath, mobile }) => (
   <Link
     to={to}
-    className={`text-gray-700 hover:text-green-500 transition-colors ${mobile ? "text-lg py-2" : "text-base"}`}
+    className={`${
+      currentPath === to ? "text-green-500" : "text-gray-700"
+    } hover:text-green-500 transition-colors ${mobile ? "text-lg py-2" : "text-base"}`}
   >
     {children}
   </Link>
 )
 
-const NavButton = ({ children, primary, mobile }) => {
-  const baseStyle = `inline-block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${mobile ? "w-full text-center" : ""}`
+const NavButton = ({ children, primary, mobile, onClick }) => {
+  const baseStyle = `inline-block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
+    mobile ? "w-full text-center" : ""
+  }`
   const defaultStyle = `text-gray-700 hover:text-green-500 hover:bg-green-50 ${primary ? "ml-2" : ""}`
   const primaryStyle = `text-white bg-green-500 hover:bg-green-600`
 
@@ -126,6 +156,7 @@ const NavButton = ({ children, primary, mobile }) => {
         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
       }}
       whileTap={{ scale: 0.95 }}
+      onClick={onClick}
     >
       <motion.div
         initial={{ scaleX: 0 }}
