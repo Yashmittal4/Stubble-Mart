@@ -12,7 +12,7 @@ const path = require("path")
 
 const app = express()
 const PORT = process.env.PORT || 5000
-const JWT_SECRET = "your_jwt_secret" 
+const JWT_SECRET = "your_jwt_secret"
 app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
@@ -67,7 +67,13 @@ const FarmerSchema = new mongoose.Schema({
   email: { type: String, required: true },
   phoneNumber: { type: String, required: true },
   address: { type: String, required: true },
-  crops: [{ cropName: String, landSize: String }],
+  crops: [
+    {
+      cropName: String,
+      landSize: String,
+      services: [String], // Add this line to include services
+    },
+  ],
   status: { type: String, enum: ["Pending", "Accepted", "Rejected"], default: "Pending" },
 })
 
@@ -490,7 +496,6 @@ app.get("/api/stats/product-price-distribution", async (req, res) => {
 
 app.get("/api/stats/top-selling-products", async (req, res) => {
   try {
-    
     const topSellingProducts = await Product.aggregate([
       { $sample: { size: 5 } },
       { $project: { name: "$name", value: { $floor: { $multiply: [{ $rand: {} }, 100] } } } },
@@ -514,10 +519,5 @@ app.get("/api/products/:id", async (req, res) => {
   }
 })
 
-
-
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-
-
-
 

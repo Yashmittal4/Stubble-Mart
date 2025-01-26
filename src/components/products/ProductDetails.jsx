@@ -4,6 +4,7 @@ import { ArrowLeft, Phone, MessageCircle, Plus, X, Check } from "lucide-react"
 import axios from "axios"
 
 const landSizeOptions = ["2-3", "4-8", "9-15", "16-50", "51+"]
+const serviceOptions = ["Cutting Service", "Transportation", "Machine Rental"]
 
 export default function ProductDetails() {
   const { productId } = useParams()
@@ -37,6 +38,7 @@ export default function ProductDetails() {
             {
               cropName: productResponse.data.name,
               landSize: "",
+              services: [],
             },
           ],
         }))
@@ -61,7 +63,18 @@ export default function ProductDetails() {
   const handleCropChange = (index, field, value) => {
     setFormData((prevState) => {
       const newCrops = [...prevState.crops]
-      newCrops[index] = { ...newCrops[index], [field]: value }
+      if (field === "services") {
+        const services = [...(newCrops[index].services || [])]
+        const serviceIndex = services.indexOf(value)
+        if (serviceIndex > -1) {
+          services.splice(serviceIndex, 1)
+        } else {
+          services.push(value)
+        }
+        newCrops[index] = { ...newCrops[index], services }
+      } else {
+        newCrops[index] = { ...newCrops[index], [field]: value }
+      }
       return { ...prevState, crops: newCrops }
     })
   }
@@ -73,7 +86,7 @@ export default function ProductDetails() {
   const handleCropSelect = (crop) => {
     setFormData((prevState) => ({
       ...prevState,
-      crops: [...prevState.crops, { cropName: crop.name, landSize: "" }],
+      crops: [...prevState.crops, { cropName: crop.name, landSize: "", services: [] }],
     }))
     setShowDropdown(false)
   }
@@ -220,6 +233,23 @@ export default function ProductDetails() {
                           ))}
                         </div>
                       </div>
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">Additional Services</label>
+                        <div className="mt-1 flex flex-wrap gap-2">
+                          {serviceOptions.map((service) => (
+                            <label key={service} className="inline-flex items-center">
+                              <input
+                                type="checkbox"
+                                value={service}
+                                checked={crop.services && crop.services.includes(service)}
+                                onChange={() => handleCropChange(index, "services", service)}
+                                className="form-checkbox h-5 w-5 text-green-500"
+                              />
+                              <span className="ml-2">{service}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   ))}
                   <button
@@ -293,8 +323,6 @@ export default function ProductDetails() {
     </div>
   )
 }
-
-
 
 
 

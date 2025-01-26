@@ -1,8 +1,6 @@
-
-
 import React, { useState, useEffect } from "react"
 import axios from "axios"
-import { Eye, CheckCircle, XCircle, Trash2 } from "lucide-react"
+import { Eye, CheckCircle, XCircle, Trash2, X } from 'lucide-react'
 import {
   BarChart,
   Bar,
@@ -183,34 +181,56 @@ const FarmersList = () => {
       </table>
       {selectedFarmer && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-2xl w-full">
-            <h2 className="text-2xl font-bold mb-4">{selectedFarmer.name}</h2>
-            <p>
-              <strong>Email:</strong> {selectedFarmer.email}
-            </p>
-            <p>
-              <strong>Phone:</strong> {selectedFarmer.phoneNumber}
-            </p>
-            <p>
-              <strong>Address:</strong> {selectedFarmer.address}
-            </p>
-            <p>
-              <strong>Status:</strong> {selectedFarmer.status}
-            </p>
-            <h3 className="text-xl font-semibold mt-4 mb-2">Crops</h3>
-            <ul>
-              {selectedFarmer.crops.map((crop, index) => (
-                <li key={index}>
-                  {crop.cropName} - {crop.landSize}
-                </li>
-              ))}
-            </ul>
-            <button
-              className="mt-6 px-4 py-2 bg-blue-500 text-white rounded-md"
-              onClick={() => setSelectedFarmer(null)}
-            >
-              Close
-            </button>
+          <div className="bg-white p-8 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-3xl font-bold text-gray-800">{selectedFarmer.name}</h2>
+              <button
+                className="text-gray-500 hover:text-gray-700"
+                onClick={() => setSelectedFarmer(null)}
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-700">Personal Information</h3>
+                <div className="space-y-2">
+                  <p><span className="font-medium">Email:</span> {selectedFarmer.email}</p>
+                  <p><span className="font-medium">Phone:</span> {selectedFarmer.phoneNumber}</p>
+                  <p><span className="font-medium">Address:</span> {selectedFarmer.address}</p>
+                  <p><span className="font-medium">Status:</span> 
+                    <span className={`ml-2 px-2 py-1 rounded-full text-sm ${
+                      selectedFarmer.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                      selectedFarmer.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {selectedFarmer.status}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-4 text-gray-700">Crops and Services</h3>
+                <div className="space-y-4">
+                  {selectedFarmer.crops.map((crop, index) => (
+                    <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                      <h4 className="text-lg font-medium mb-2">{crop.cropName}</h4>
+                      <p><span className="font-medium">Land Size:</span> {crop.landSize} acres</p>
+                      {crop.services && crop.services.length > 0 && (
+                        <div className="mt-2">
+                          <p className="font-medium">Services:</p>
+                          <ul className="list-disc list-inside">
+                            {crop.services.map((service, serviceIndex) => (
+                              <li key={serviceIndex}>{service}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
