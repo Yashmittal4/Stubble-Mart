@@ -96,7 +96,7 @@ Stubble Mart follows a microservices architecture to ensure scalability and main
 
 1. Clone the repository:
    ```
-   git clone https://github.com/Yashmittal4/stubble-mart.git
+   git clone https://github.com/Yashmittal4/Stubble-Mart.git
    cd stubble-mart
    ```
 
