@@ -39,7 +39,7 @@ function Navbar() {
       <nav className="fixed top-0 w-full bg-white shadow-md z-40">
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
-            <img src={logo || "/placeholder.svg"} alt="Logo" className="h-10" />
+            <img src={logo || "/placeholder.svg"} alt="Logo" className="h-16" />
 
             <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 flex-1 max-w-md mx-6">
               <Search className="h-5 w-5 text-gray-400 mr-2" />

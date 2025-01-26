@@ -13,11 +13,14 @@ import a6 from "../assets/images/truck-land.png"
 import a7 from "../assets/images/crops.png"
 import a8 from "../assets/images/sq-truck.png"
 import a9 from "../assets/images/sq-truck-2x.png"
-
+import axios from "axios";
 const Home = () => {
-  
+  const [stubbleProducts, setStubbleProducts] = useState([]);
+const [loadingStubble, setLoadingStubble] = useState(true);
+const [errorStubble, setErrorStubble] = useState(null);
   const [currentStubbleSlide, setCurrentStubbleSlide] = useState(0);
   const [currentBlogSlide, setCurrentBlogSlide] = useState(0);
+
   
   const [statsRef, statsInView] = useInView({
     triggerOnce: true,
@@ -36,13 +39,21 @@ const Home = () => {
     { number: 5, suffix: '+', text: 'Years Experience' }
   ];
 
-  const stubbleProducts = [
-    { title: 'Wheat Stubble', price: '$299', image: '/placeholder.svg?height=300&width=400' },
-    { title: 'Rice Stubble', price: '$399', image: '/placeholder.svg?height=300&width=400' },
-    { title: 'Corn Stubble', price: '$349', image: '/placeholder.svg?height=300&width=400' },
-    { title: 'Soy Stubble', price: '$449', image: '/placeholder.svg?height=300&width=400' }
-  ];
-
+  useEffect(() => {
+    const fetchStubbleProducts = async () => {
+      try {
+        setLoadingStubble(true);
+        const response = await axios.get("http://localhost:5000/api/products");
+        setStubbleProducts(response.data.slice(0, 4));
+        setLoadingStubble(false);
+      } catch (err) {
+        setErrorStubble("Error fetching stubble products. Please try again later.");
+        setLoadingStubble(false);
+      }
+    };
+  
+    fetchStubbleProducts();
+  }, []);
   const services = [
     {
       title: 'Recycling Stubble Solutions',
@@ -115,9 +126,11 @@ const Home = () => {
               Sustainable Solutions
             </h1>
             <p className="text-lg mb-8">Join us in our mission to create a greener future</p>
+            <Link to="/services">
             <button className="bg-green-500 text-white px-8 py-3 rounded-full hover:bg-green-600 transition-colors">
               Learn More
             </button>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -203,56 +216,65 @@ const Home = () => {
       </section>
 
       {/* Popular Stubble Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold mb-8 text-green-600">Popular Stubble Products</h2>
-          <div className="relative">
-            <div className="overflow-hidden">
+      {/* Popular Stubble Section */}
+<section className="py-16 bg-gray-50">
+  <div className="container mx-auto px-4">
+    <h2 className="text-3xl font-bold mb-8 text-green-600">Popular Stubble Products</h2>
+    {loadingStubble ? (
+      <div>Loading stubble products...</div>
+    ) : errorStubble ? (
+      <div>{errorStubble}</div>
+    ) : (
+      <div className="relative">
+        <div className="overflow-hidden">
+          <motion.div
+            className="flex transition-all duration-500"
+            style={{ transform: `translateX(-${currentStubbleSlide * 100}%)` }}
+          >
+            {stubbleProducts.map((product, index) => (
               <motion.div
-                className="flex transition-all duration-500"
-                style={{ transform: `translateX(-${currentStubbleSlide * 100}%)` }}
+                key={product._id}
+                className="min-w-full md:min-w-[33.333%] p-4"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
               >
-                {stubbleProducts.map((product, index) => (
-                  <motion.div
-                    key={index}
-                    className="min-w-full md:min-w-[33.333%] p-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                      <img
-                        src={product.image || "/placeholder.svg"}
-                        alt={product.title}
-                        className="w-full h-48 object-cover"
-                      />
-                      <div className="p-4">
-                        <h3 className="font-bold text-xl mb-2">{product.title}</h3>
-                        <p className="text-green-600 font-bold">{product.price}</p>
-                        <button className="mt-4 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-colors">
-                          Learn More
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
+                <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                  <img
+                    src={`http://localhost:5000/${product.image}` || "/placeholder.svg"}
+                    alt={product.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h3 className="font-bold text-xl mb-2">{product.name}</h3>
+                    <p className="text-green-600 font-bold">${product.minPrice} - ${product.maxPrice}</p>
+                    <Link to={`/products/${product._id}`}>
+                      <button className="mt-4 bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-colors">
+                        Sell Stubble
+                      </button>
+                    </Link>
+                  </div>
+                </div>
               </motion.div>
-            </div>
-            <button
-              onClick={() => setCurrentStubbleSlide(Math.max(0, currentStubbleSlide - 1))}
-              className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={() => setCurrentStubbleSlide(Math.min(stubbleProducts.length - 3, currentStubbleSlide + 1))}
-              className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </div>
+            ))}
+          </motion.div>
         </div>
-      </section>
+        <button
+          onClick={() => setCurrentStubbleSlide(Math.max(0, currentStubbleSlide - 1))}
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
+        <button
+          onClick={() => setCurrentStubbleSlide(Math.min(stubbleProducts.length - 3, currentStubbleSlide + 1))}
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-md"
+        >
+          <ChevronRight className="h-6 w-6" />
+        </button>
+      </div>
+    )}
+  </div>
+</section>
 
       {/* Services Section */}
       <section className="py-16">
