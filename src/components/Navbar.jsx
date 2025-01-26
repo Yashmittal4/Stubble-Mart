@@ -147,4 +147,3 @@ const NavButton = ({ children, primary, mobile }) => {
 }
 
 export default Navbar
-

@@ -1,11 +1,40 @@
-import React from "react"
+
+
+import React, { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { ArrowLeft } from "lucide-react"
+import axios from "axios"
 import SearchBar from "./SearchBar"
 import ProductCard from "./ProductCard"
-import { products } from "../utils"
 
 export default function Products() {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetchProducts()
+  }, [])
+
+  const fetchProducts = async (searchTerm = "") => {
+    try {
+      setLoading(true)
+      const response = await axios.get(`http://localhost:5000/api/products${searchTerm ? `?search=${searchTerm}` : ""}`)
+      setProducts(response.data)
+      setLoading(false)
+    } catch (err) {
+      setError("Error fetching products. Please try again later.")
+      setLoading(false)
+    }
+  }
+
+  const handleSearch = (searchTerm) => {
+    fetchProducts(searchTerm)
+  }
+
+  if (loading) return <div>Loading...</div>
+  if (error) return <div>{error}</div>
+
   return (
     <div className="min-h-screen px-4 md:px-20 py-8">
       <div className="max-w-6xl mx-auto">
@@ -18,12 +47,18 @@ export default function Products() {
               Search Your <span className="text-green-600">Stubble</span>
             </h1>
           </div>
-          <SearchBar />
+          <SearchBar onSearch={handleSearch} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product) => (
-            <Link to={`/products/${product.id}`} key={product.id}>
-              <ProductCard {...product} />
+            <Link to={`/products/${product._id}`} key={product._id}>
+              <ProductCard
+                imgUrl={`http://localhost:5000/${product.image}`}
+                name={product.name}
+                description={product.description}
+                minPrice={product.minPrice}
+                maxPrice={product.maxPrice}
+              />
             </Link>
           ))}
         </div>
@@ -31,4 +66,5 @@ export default function Products() {
     </div>
   )
 }
+
 

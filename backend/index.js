@@ -7,14 +7,16 @@ const { body, validationResult } = require("express-validator")
 const nodemailer = require("nodemailer")
 const randomstring = require("randomstring")
 const cookieParser = require("cookie-parser")
+const multer = require("multer")
+const path = require("path")
 
 const app = express()
 const PORT = process.env.PORT || 5000
 const JWT_SECRET = "your_jwt_secret" 
-
 app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
+app.use("/uploads", express.static("uploads"))
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/stubble", {
@@ -24,6 +26,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err))
 
+// User Schema and Model (unchanged)
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -36,6 +39,64 @@ const UserSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", UserSchema)
 
+// Collaborator Schema and Model
+const CollaboratorSchema = new mongoose.Schema({
+  collaborationType: { type: String, required: true },
+  companyName: { type: String, required: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  companyAddress: { type: String, required: true },
+  companyDescription: { type: String },
+  query: { type: String },
+  status: { type: String, enum: ["Pending", "Accepted", "Rejected"], default: "Pending" },
+  crops: [
+    {
+      cropName: String,
+      priceRangeFrom: Number,
+      priceRangeTo: Number,
+    },
+  ],
+})
+
+const Collaborator = mongoose.model("Collaborator", CollaboratorSchema)
+
+// Farmer Schema and Model
+const FarmerSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  address: { type: String, required: true },
+  crops: [{ cropName: String, landSize: String }],
+  status: { type: String, enum: ["Pending", "Accepted", "Rejected"], default: "Pending" },
+})
+
+const Farmer = mongoose.model("Farmer", FarmerSchema)
+
+// Product Schema and Model (updated to include price range)
+const ProductSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  description: { type: String, required: true },
+  minPrice: { type: Number, required: true },
+  maxPrice: { type: Number, required: true },
+  image: { type: String, required: true },
+})
+
+const Product = mongoose.model("Product", ProductSchema)
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/")
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname))
+  },
+})
+
+const upload = multer({ storage: storage })
+
+// Validation middleware
 const validateSignup = [
   body("name").isLength({ min: 2 }).withMessage("Name must be at least 2 characters"),
   body("email").isEmail().withMessage("Invalid email address"),
@@ -79,6 +140,7 @@ function sendOTP(email, otp) {
   })
 }
 
+// Authentication routes
 app.post("/api/signup", validateSignup, async (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
@@ -204,24 +266,7 @@ app.post(
   },
 )
 
-const CollaboratorSchema = new mongoose.Schema({
-  collaborationType: { type: String, required: true },
-  companyName: { type: String, required: true },
-  name: { type: String, required: true },
-  email: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
-  companyAddress: { type: String, required: true },
-  companyDescription: { type: String },
-  query: { type: String },
-  crops: [{
-    cropName: String,
-    priceRangeFrom: Number,
-    priceRangeTo: Number
-  }]
-})
-
-const Collaborator = mongoose.model("Collaborator", CollaboratorSchema)
-
+// Collaborator routes
 app.post("/api/submit-collaborator", async (req, res) => {
   try {
     const collaborator = new Collaborator(req.body)
@@ -233,6 +278,246 @@ app.post("/api/submit-collaborator", async (req, res) => {
   }
 })
 
+app.get("/api/collaborators", async (req, res) => {
+  try {
+    const collaborators = await Collaborator.find()
+    res.json(collaborators)
+  } catch (error) {
+    console.error("Error fetching collaborators:", error)
+    res.status(500).json({ message: "Error fetching collaborators" })
+  }
+})
+
+app.put("/api/collaborators/:id", async (req, res) => {
+  try {
+    const updatedCollaborator = await Collaborator.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    res.json(updatedCollaborator)
+  } catch (error) {
+    console.error("Error updating collaborator:", error)
+    res.status(500).json({ message: "Error updating collaborator" })
+  }
+})
+
+app.delete("/api/collaborators/:id", async (req, res) => {
+  try {
+    await Collaborator.findByIdAndDelete(req.params.id)
+    res.json({ message: "Collaborator deleted successfully" })
+  } catch (error) {
+    console.error("Error deleting collaborator:", error)
+    res.status(500).json({ message: "Error deleting collaborator" })
+  }
+})
+
+// Farmer routes
+app.post("/api/farmers", async (req, res) => {
+  try {
+    const farmer = new Farmer(req.body)
+    await farmer.save()
+    res.status(201).json({ message: "Farmer information submitted successfully" })
+  } catch (error) {
+    console.error("Error submitting farmer information:", error)
+    res.status(500).json({ message: "Error submitting farmer information" })
+  }
+})
+
+app.get("/api/farmers", async (req, res) => {
+  try {
+    const farmers = await Farmer.find()
+    res.json(farmers)
+  } catch (error) {
+    console.error("Error fetching farmers:", error)
+    res.status(500).json({ message: "Error fetching farmers" })
+  }
+})
+
+app.put("/api/farmers/:id", async (req, res) => {
+  try {
+    const updatedFarmer = await Farmer.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    res.json(updatedFarmer)
+  } catch (error) {
+    console.error("Error updating farmer:", error)
+    res.status(500).json({ message: "Error updating farmer" })
+  }
+})
+
+app.delete("/api/farmers/:id", async (req, res) => {
+  try {
+    await Farmer.findByIdAndDelete(req.params.id)
+    res.json({ message: "Farmer deleted successfully" })
+  } catch (error) {
+    console.error("Error deleting farmer:", error)
+    res.status(500).json({ message: "Error deleting farmer" })
+  }
+})
+
+// Product routes (updated to handle price range)
+app.post("/api/products", upload.single("image"), async (req, res) => {
+  try {
+    const { name, description, minPrice, maxPrice } = req.body
+    const image = req.file.path
+    const product = new Product({ name, description, minPrice, maxPrice, image })
+    await product.save()
+    res.status(201).json({ message: "Product added successfully" })
+  } catch (error) {
+    console.error("Error adding product:", error)
+    res.status(500).json({ message: "Error adding product" })
+  }
+})
+
+app.get("/api/products", async (req, res) => {
+  try {
+    const products = await Product.find()
+    res.json(products)
+  } catch (error) {
+    console.error("Error fetching products:", error)
+    res.status(500).json({ message: "Error fetching products" })
+  }
+})
+
+app.put("/api/products/:id", upload.single("image"), async (req, res) => {
+  try {
+    const { name, description, minPrice, maxPrice } = req.body
+    const image = req.file ? req.file.path : req.body.image
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { name, description, minPrice, maxPrice, image },
+      { new: true },
+    )
+    res.json(updatedProduct)
+  } catch (error) {
+    console.error("Error updating product:", error)
+    res.status(500).json({ message: "Error updating product" })
+  }
+})
+
+app.delete("/api/products/:id", async (req, res) => {
+  try {
+    await Product.findByIdAndDelete(req.params.id)
+    res.json({ message: "Product deleted successfully" })
+  } catch (error) {
+    console.error("Error deleting product:", error)
+    res.status(500).json({ message: "Error deleting product" })
+  }
+})
+
+// New routes for statistics
+app.get("/api/stats/monthly", async (req, res) => {
+  try {
+    const monthlyStats = await Promise.all([
+      Collaborator.countDocuments(),
+      Farmer.countDocuments(),
+      Product.countDocuments(),
+    ])
+
+    const stats = [
+      { month: "Current", collaborators: monthlyStats[0], farmers: monthlyStats[1], products: monthlyStats[2] },
+    ]
+
+    res.json(stats)
+  } catch (error) {
+    console.error("Error fetching monthly stats:", error)
+    res.status(500).json({ message: "Error fetching monthly stats" })
+  }
+})
+
+app.get("/api/stats/collaboration-types", async (req, res) => {
+  try {
+    const collaborationTypes = await Collaborator.aggregate([
+      { $group: { _id: "$collaborationType", count: { $sum: 1 } } },
+      { $project: { name: "$_id", value: "$count" } },
+    ])
+    res.json(collaborationTypes)
+  } catch (error) {
+    console.error("Error fetching collaboration types:", error)
+    res.status(500).json({ message: "Error fetching collaboration types" })
+  }
+})
+
+app.get("/api/stats/crop-distribution", async (req, res) => {
+  try {
+    const cropDistribution = await Farmer.aggregate([
+      { $unwind: "$crops" },
+      { $group: { _id: "$crops.cropName", count: { $sum: 1 } } },
+      { $project: { name: "$_id", value: "$count" } },
+    ])
+    res.json(cropDistribution)
+  } catch (error) {
+    console.error("Error fetching crop distribution:", error)
+    res.status(500).json({ message: "Error fetching crop distribution" })
+  }
+})
+
+app.get("/api/stats/farmer-status-distribution", async (req, res) => {
+  try {
+    const farmerStatusDistribution = await Farmer.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+      { $project: { name: "$_id", value: "$count" } },
+    ])
+    res.json(farmerStatusDistribution)
+  } catch (error) {
+    console.error("Error fetching farmer status distribution:", error)
+    res.status(500).json({ message: "Error fetching farmer status distribution" })
+  }
+})
+
+app.get("/api/stats/product-price-distribution", async (req, res) => {
+  try {
+    const productPriceDistribution = await Product.aggregate([
+      {
+        $group: {
+          _id: {
+            $switch: {
+              branches: [
+                { case: { $lte: ["$maxPrice", 1000] }, then: "0-1000" },
+                { case: { $lte: ["$maxPrice", 2000] }, then: "1001-2000" },
+                { case: { $lte: ["$maxPrice", 3000] }, then: "2001-3000" },
+                { case: { $lte: ["$maxPrice", 4000] }, then: "3001-4000" },
+              ],
+              default: "4001+",
+            },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      { $project: { name: "$_id", value: "$count" } },
+    ])
+    res.json(productPriceDistribution)
+  } catch (error) {
+    console.error("Error fetching product price distribution:", error)
+    res.status(500).json({ message: "Error fetching product price distribution" })
+  }
+})
+
+app.get("/api/stats/top-selling-products", async (req, res) => {
+  try {
+    
+    const topSellingProducts = await Product.aggregate([
+      { $sample: { size: 5 } },
+      { $project: { name: "$name", value: { $floor: { $multiply: [{ $rand: {} }, 100] } } } },
+    ])
+    res.json(topSellingProducts)
+  } catch (error) {
+    console.error("Error fetching top selling products:", error)
+    res.status(500).json({ message: "Error fetching top selling products" })
+  }
+})
+app.get("/api/products/:id", async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id)
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" })
+    }
+    res.json(product)
+  } catch (error) {
+    console.error("Error fetching product:", error)
+    res.status(500).json({ message: "Error fetching product" })
+  }
+})
+
+
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+
+
 
 
