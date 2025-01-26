@@ -1,8 +1,12 @@
+
+
+
 import React, { useState } from "react"
 import { motion } from "framer-motion"
 import { Mail } from "lucide-react"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
+import { useAuth } from "../../contexts/AuthContext"
 import l1 from "../../assets/svg/newlogo.svg"
 import l2 from "../../assets/svg/banner4 1.svg"
 
@@ -12,25 +16,27 @@ const LoginPage = () => {
   const [showOtpInput, setShowOtpInput] = useState(false)
   const [otp, setOtp] = useState("")
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = useAuth()
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setCredentials((prev) => ({ ...prev, [name]: value }))
   }
 
+
   const handleLogin = async (method) => {
     try {
       if (method === "google") {
-        // firebase has to be implemented
         console.log("Google login not implemented yet")
         return
       }
 
       const response = await axios.post("http://localhost:5000/api/login", credentials)
       console.log("Login successful!", response.data)
-      localStorage.setItem("token", response.data.token)
-      localStorage.setItem("user", JSON.stringify(response.data.user))
-      navigate("/")
+      login(response.data.user)
+      const from = location.state?.from?.pathname || "/"
+      navigate(from, { replace: true })
     } catch (error) {
       console.error("Login error:", error.response.data)
       if (error.response.status === 403) {
@@ -46,9 +52,9 @@ const LoginPage = () => {
     try {
       const response = await axios.post("http://localhost:5000/api/verify-otp", { email: credentials.email, otp })
       console.log("OTP verification successful:", response.data)
-      localStorage.setItem("token", response.data.token)
-      localStorage.setItem("user", JSON.stringify(response.data.user))
-      navigate("/")
+      login(response.data.user)
+      const from = location.state?.from?.pathname || "/"
+      navigate(from, { replace: true })
     } catch (error) {
       console.error("OTP verification error:", error.response.data)
       setError(error.response.data.message || "Invalid OTP")
