@@ -22,6 +22,7 @@ export default function ProductDetails() {
     crops: [],
   })
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false)
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,11 +53,40 @@ export default function ProductDetails() {
     fetchData()
   }, [productId])
 
+  const validateName = (name) => {
+    const nameRegex = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/
+    return nameRegex.test(name)
+  }
+
+  const validatePhoneNumber = (phoneNumber) => {
+    const phoneRegex = /^\d{10}$/
+    return phoneRegex.test(phoneNumber)
+  }
+
+  const validateAddress = (address) => {
+    const addressRegex = /^[a-zA-Z0-9#,\- ]+(?:\s[a-zA-Z0-9#,\- ]+)*$/
+    return addressRegex.test(address)
+  }
+
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prevState) => ({
       ...prevState,
       [name]: value,
+    }))
+
+    let error = ""
+    if (name === "name" && !validateName(value)) {
+      error = "Name should only contain alphabets and single spaces between words."
+    } else if (name === "phoneNumber" && !validatePhoneNumber(value)) {
+      error = "Phone number should be exactly 10 digits."
+    } else if (name === "address" && !validateAddress(value)) {
+      error = "Address should contain only alphabets, numbers, #, -, , and single spaces."
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
     }))
   }
 
@@ -100,6 +130,22 @@ export default function ProductDetails() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const newErrors = {}
+    if (!validateName(formData.name)) {
+      newErrors.name = "Name should only contain alphabets and single spaces between words."
+    }
+    if (!validatePhoneNumber(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Phone number should be exactly 10 digits."
+    }
+    if (!validateAddress(formData.address)) {
+      newErrors.address = "Address should contain only alphabets, numbers, #, -, , and single spaces."
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
     try {
       await axios.post("http://localhost:5000/api/farmers", formData)
       setShowSuccessAnimation(true)
@@ -151,9 +197,12 @@ export default function ProductDetails() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 ${
+                      errors.name ? "border-red-500" : ""
+                    }`}
                     required
                   />
+                  {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
                 </div>
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -179,9 +228,12 @@ export default function ProductDetails() {
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 ${
+                      errors.phoneNumber ? "border-red-500" : ""
+                    }`}
                     required
                   />
+                  {errors.phoneNumber && <p className="mt-1 text-sm text-red-500">{errors.phoneNumber}</p>}
                 </div>
                 <div>
                   <label htmlFor="address" className="block text-sm font-medium text-gray-700">
@@ -193,9 +245,12 @@ export default function ProductDetails() {
                     name="address"
                     value={formData.address}
                     onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"
+                    className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 ${
+                      errors.address ? "border-red-500" : ""
+                    }`}
                     required
                   />
+                  {errors.address && <p className="mt-1 text-sm text-red-500">{errors.address}</p>}
                 </div>
 
                 <div>
@@ -323,7 +378,4 @@ export default function ProductDetails() {
     </div>
   )
 }
-
-
-
 

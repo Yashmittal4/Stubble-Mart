@@ -16,8 +16,8 @@ import a9 from "../assets/images/sq-truck-2x.png"
 import axios from "axios";
 const Home = () => {
   const [stubbleProducts, setStubbleProducts] = useState([]);
-const [loadingStubble, setLoadingStubble] = useState(true);
-const [errorStubble, setErrorStubble] = useState(null);
+  const [loadingStubble, setLoadingStubble] = useState(true);
+  const [errorStubble, setErrorStubble] = useState(null);
   const [currentStubbleSlide, setCurrentStubbleSlide] = useState(0);
   const [currentBlogSlide, setCurrentBlogSlide] = useState(0);
 

@@ -61,20 +61,36 @@ export default function CollaboratorForm() {
     }))
   }
 
+
   const validateForm = () => {
     const errors = {}
+    const nameRegex = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/
+    const addressRegex = /^[a-zA-Z0-9#,-]+(?:\s[a-zA-Z0-9#,-]+)*$/
+  
     if (step === 1) {
       if (!formData.companyName.trim()) errors.companyName = "Company name is required"
+      else if (!nameRegex.test(formData.companyName))
+        errors.companyName = "Company name should contain only alphabets and single spaces"
+  
       if (!formData.name.trim()) errors.name = "Name is required"
+      else if (!nameRegex.test(formData.name)) errors.name = "Name should contain only alphabets and single spaces"
+  
       if (!formData.email.trim()) errors.email = "Email is required"
       else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = "Email is invalid"
+  
       if (!formData.phoneNumber.trim()) errors.phoneNumber = "Phone number is required"
       else if (!/^\d{10}$/.test(formData.phoneNumber)) errors.phoneNumber = "Phone number should be 10 digits"
+  
       if (!formData.companyAddress.trim()) errors.companyAddress = "Company address is required"
+      else if (!addressRegex.test(formData.companyAddress))
+        errors.companyAddress = "Address should contain only alphabets, numbers, #, -, , and single spaces"
     } else if (step === 2) {
       if (formData.collaborationType === "Stubble purchasing company") {
         formData.crops.forEach((crop, index) => {
           if (!crop.cropName.trim()) errors[`crops.${index}.cropName`] = "Crop name is required"
+          else if (!nameRegex.test(crop.cropName))
+            errors[`crops.${index}.cropName`] = "Crop name should contain only alphabets and single spaces"
+  
           if (!crop.priceRangeFrom) errors[`crops.${index}.priceRangeFrom`] = "Price range from is required"
           if (!crop.priceRangeTo) errors[`crops.${index}.priceRangeTo`] = "Price range to is required"
           if (Number(crop.priceRangeFrom) >= Number(crop.priceRangeTo)) {
@@ -86,6 +102,8 @@ export default function CollaboratorForm() {
     setValidationErrors(errors)
     return Object.keys(errors).length === 0
   }
+  
+  
 
   const handleNext = async () => {
     if (validateForm()) {

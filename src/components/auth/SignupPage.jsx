@@ -9,12 +9,19 @@ import { useNavigate } from "react-router-dom"
 import l1 from "../../assets/svg/newlogo.svg"
 import l2 from "../../assets/svg/banner4 1.svg"
 
+
 const signupSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .regex(/^[a-zA-Z]+$/, "Name must contain only alphabets"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
+  phoneNumber: z.string().regex(/^\d{10}$/, "Phone number must be exactly 10 digits"),
+  address: z
+    .string()
+    .min(5, "Address must be at least 5 characters")
+    .regex(/^[a-zA-Z0-9\s#,-]+$/, "Address can only contain letters, numbers, spaces, #, -, and ,"),
   role: z.enum(["FARMER", "COLLABORATOR"]),
 })
 

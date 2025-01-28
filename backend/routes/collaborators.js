@@ -10,3 +10,4 @@ router.delete("/:id", collaboratorController.deleteCollaborator)
 
 module.exports = router
 
+

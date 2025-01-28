@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect } from "react"
 import axios from "axios"
 import { Eye, Edit, Trash2 } from "lucide-react"
@@ -28,6 +24,7 @@ const ProductsList = () => {
     productPriceDistribution: [],
     topSellingProducts: [],
   })
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     fetchProducts()
@@ -59,8 +56,38 @@ const ProductsList = () => {
     }
   }
 
+  const validateName = (name) => {
+    const nameRegex = /^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/
+    return nameRegex.test(name)
+  }
+
+  const validateDescription = (description) => {
+    const descriptionRegex = /^[a-zA-Z0-9#,\- ]+(?:\s[a-zA-Z0-9#,\- ]+)*$/
+    return descriptionRegex.test(description)
+  }
+
+  const handleInputChange = (e, setFunction) => {
+    const { name, value } = e.target
+    setFunction((prev) => ({ ...prev, [name]: value }))
+
+    let error = ""
+    if (name === "name" && !validateName(value)) {
+      error = "Name should only contain alphabets and single spaces between words."
+    } else if (name === "description" && !validateDescription(value)) {
+      error = "Description should contain only alphabets, numbers, #, -, , and single spaces."
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: error,
+    }))
+  }
+
   const handleAddProduct = async (e) => {
     e.preventDefault()
+    if (Object.values(errors).some((error) => error !== "")) {
+      return
+    }
     try {
       const formData = new FormData()
       formData.append("name", newProduct.name)
@@ -82,6 +109,9 @@ const ProductsList = () => {
 
   const handleEditProduct = async (e) => {
     e.preventDefault()
+    if (Object.values(errors).some((error) => error !== "")) {
+      return
+    }
     try {
       const formData = new FormData()
       formData.append("name", editingProduct.name)
@@ -175,11 +205,15 @@ const ProductsList = () => {
               <input
                 type="text"
                 id="name"
+                name="name"
                 value={newProduct.name}
-                onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => handleInputChange(e, setNewProduct)}
+                className={`mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.name ? "border-red-500" : ""
+                }`}
                 required
               />
+              {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
             </div>
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700">
@@ -187,11 +221,15 @@ const ProductsList = () => {
               </label>
               <textarea
                 id="description"
+                name="description"
                 value={newProduct.description}
-                onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(e) => handleInputChange(e, setNewProduct)}
+                className={`mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  errors.description ? "border-red-500" : ""
+                }`}
                 required
               />
+              {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
             </div>
             <div>
               <label htmlFor="minPrice" className="block text-sm font-medium text-gray-700">
@@ -200,8 +238,9 @@ const ProductsList = () => {
               <input
                 type="number"
                 id="minPrice"
+                name="minPrice"
                 value={newProduct.minPrice}
-                onChange={(e) => setNewProduct({ ...newProduct, minPrice: e.target.value })}
+                onChange={(e) => handleInputChange(e, setNewProduct)}
                 className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -213,8 +252,9 @@ const ProductsList = () => {
               <input
                 type="number"
                 id="maxPrice"
+                name="maxPrice"
                 value={newProduct.maxPrice}
-                onChange={(e) => setNewProduct({ ...newProduct, maxPrice: e.target.value })}
+                onChange={(e) => handleInputChange(e, setNewProduct)}
                 className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
@@ -284,11 +324,15 @@ const ProductsList = () => {
                 <input
                   type="text"
                   id="edit-name"
+                  name="name"
                   value={editingProduct.name}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => handleInputChange(e, setEditingProduct)}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.name ? "border-red-500" : ""
+                  }`}
                   required
                 />
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
               </div>
               <div>
                 <label htmlFor="edit-description" className="block text-sm font-medium text-gray-700">
@@ -296,11 +340,15 @@ const ProductsList = () => {
                 </label>
                 <textarea
                   id="edit-description"
+                  name="description"
                   value={editingProduct.description}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                  className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={(e) => handleInputChange(e, setEditingProduct)}
+                  className={`mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.description ? "border-red-500" : ""
+                  }`}
                   required
                 />
+                {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
               </div>
               <div>
                 <label htmlFor="edit-minPrice" className="block text-sm font-medium text-gray-700">
@@ -309,8 +357,9 @@ const ProductsList = () => {
                 <input
                   type="number"
                   id="edit-minPrice"
+                  name="minPrice"
                   value={editingProduct.minPrice}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, minPrice: e.target.value })}
+                  onChange={(e) => handleInputChange(e, setEditingProduct)}
                   className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -322,8 +371,9 @@ const ProductsList = () => {
                 <input
                   type="number"
                   id="edit-maxPrice"
+                  name="maxPrice"
                   value={editingProduct.maxPrice}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, maxPrice: e.target.value })}
+                  onChange={(e) => handleInputChange(e, setEditingProduct)}
                   className="mt-1 block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -361,5 +411,4 @@ const ProductsList = () => {
 }
 
 export default ProductsList
-
 

@@ -39,11 +39,11 @@ function Navbar() {
           <div className="flex justify-between items-center">
             <img src={logo || "/placeholder.svg"} alt="Logo" className="h-16" />
 
-            <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 flex-1 max-w-md mx-6">
+            {/* <div className="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 flex-1 max-w-md mx-6">
               <Search className="h-5 w-5 text-gray-400 mr-2" />
               <input type="text" placeholder="Search..." className="bg-transparent outline-none w-full text-gray-700" />
               <Mic className="h-5 w-5 text-gray-400 ml-2 cursor-pointer" />
-            </div>
+            </div> */}
 
             <div className="hidden md:flex items-center space-x-6">
               <NavLink to="/" currentPath={location.pathname}>Home</NavLink>
@@ -87,7 +87,7 @@ function Navbar() {
               exit={{ opacity: 0, y: -20 }}
               className="md:hidden mt-4 pb-4"
             >
-              <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 mb-4">
+              {/* <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 mb-4">
                 <Search className="h-5 w-5 text-gray-400 mr-2" />
                 <input
                   type="text"
@@ -95,7 +95,7 @@ function Navbar() {
                   className="bg-transparent outline-none w-full text-gray-700"
                 />
                 <Mic className="h-5 w-5 text-gray-400 ml-2" />
-              </div>
+              </div> */}
               <div className="flex flex-col space-y-2">
                 <NavLink to="/" currentPath={location.pathname} mobile>Home</NavLink>
                 <NavLink to="/about" currentPath={location.pathname} mobile>About</NavLink>
@@ -176,3 +176,6 @@ const NavButton = ({ children, primary, mobile, onClick }) => {
 }
 
 export default Navbar
+
+
+
