@@ -30,6 +30,7 @@ const Hero = () => {
             transition: 'opacity 0.8s ease-out, transform 0.8s ease-out'
           }}
         >
+      
           Welcome to Stubble Mart
         </h1>
 
